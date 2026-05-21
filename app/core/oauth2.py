@@ -11,7 +11,7 @@ from app.schemas.user import TokenData
 oauth2_schema = OAuth2PasswordBearer(tokenUrl='login')
 
 
-SECRET_KEY = settings.security_key
+SECRET_KEY = settings.secret_key
 ALGORITHM = settings.algorithm
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
