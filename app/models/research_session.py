@@ -22,6 +22,6 @@ class ResearchSession(Base):
     source_count = Column(Integer,default=0,nullable=False)
     created_at = Column(TIMESTAMP(timezone=True),server_default=text('now()'),nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True),server_default=text('now()'),server_onupdate=text('now()'),nullable=False)
-    user = relationship('User',back_populates='session')
+    user = relationship('User',back_populates='sessions')
     sources = relationship('Source',back_populates='session')
     messages = relationship('ConversationMessage',back_populates='session')

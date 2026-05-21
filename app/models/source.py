@@ -34,4 +34,4 @@ class Source(Base):
     task_id = Column(String,nullable=True)
     error_message = Column(Text,nullable=True)
     uploaded_at = Column(TIMESTAMP(timezone=True),server_default=text('now()'),nullable=False)
-    session = relationship('ResearchSession',back_populates='source')
+    session = relationship('ResearchSession',back_populates='sources')
