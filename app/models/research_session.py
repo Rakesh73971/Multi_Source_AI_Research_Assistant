@@ -1,7 +1,7 @@
 from sqlalchemy import Column,Integer,String,ForeignKey,Text,TIMESTAMP,text
 from sqlalchemy import Enum as SAEnum
-from enum import PyEnum
-from app.core.database import Base
+from enum import Enum as PyEnum
+from app.db.database import Base
 from sqlalchemy.orm import relationship
 
 class SessionStatus(PyEnum):
