@@ -4,17 +4,17 @@ from app.models.user import User
 from app.core.utils import hash_password
 
 def create_user_service(db:Session,user):
-    user = User(
+    db_user = User(
         full_name = user.full_name,
         email=user.email,
         password = hash_password(user.password),
         role = user.role,
         is_active = user.is_active if user.is_active is not None else True
     )
-    db.add(user)
-    db.commit(user)
-    db.refresh(User)
-    return user
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 
 def get_users_service(db:Session):
     users = db.query(User).all()
