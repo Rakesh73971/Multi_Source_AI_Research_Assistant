@@ -19,7 +19,6 @@ def create_user(user:UserCreate,db:Session=Depends(get_db)):
 
 
 
-
 @router.get("/",status_code=status.HTTP_200_OK,response_model=List[UserResponse])
 def get_users(db:Session=Depends(get_db)):
     return get_users_service(db)
@@ -34,7 +33,7 @@ def get_user(id:int,db:Session=Depends(get_db)):
 
 @router.patch("/{id}",status_code=status.HTTP_202_ACCEPTED,response_model=UserResponse)
 def update_user(id:int,user:UserCreate,db:Session=Depends(get_db),current_user=Depends(get_current_user)):
-    return update_user_service(db,int,user)
+    return update_user_service(db,id,user)
 
 
 
