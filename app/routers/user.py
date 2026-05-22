@@ -31,9 +31,17 @@ def get_user(id:int,db:Session=Depends(get_db)):
 
 
 
-@router.patch("/{id}",status_code=status.HTTP_202_ACCEPTED,response_model=UserResponse)
+@router.put("/{id}",status_code=status.HTTP_200_OK,response_model=UserResponse)
 def update_user(id:int,user:UserCreate,db:Session=Depends(get_db),current_user=Depends(get_current_user)):
     return update_user_service(db,id,user)
+
+
+
+
+@router.patch("/{id}",status_code=status.HTTP_200_OK,response_model=UserResponse)
+def update_user(id:int,user:UserCreate,db:Session=Depends(get_db),current_user=Depends(get_current_user)):
+    return update_user_service(db,id,user)
+
 
 
 
