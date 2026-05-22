@@ -25,9 +25,11 @@ def create_source_service(source,db:Session,current_user=Depends(get_current_use
     return db_source
 
 
+
 def get_sources_service(db:Session):
     sources = db.query(Source).all()
     return sources
+
 
 
 def get_source_service(db:Session,source_id):
@@ -35,6 +37,20 @@ def get_source_service(db:Session,source_id):
     if source is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"source with id {source_id} not found")
     return source
+
+
+
+def update_source_service(db:Session,source_id,update_source):
+    source = db.query(Source).filter(Source.id == source_id).first()
+    if source is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"source with id {source_id} not found")
+    updated_source = update_source.model_dump(exclude_unset=True)
+    for key,value in updated_source.items():
+        setattr(source,key,value)
+    db.commit()
+    db.refresh(source)
+    return source
+
 
 
 def delete_source_service(db:Session,source_id):
