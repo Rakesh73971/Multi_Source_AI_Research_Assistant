@@ -8,7 +8,7 @@ from jose import jwt,JWTError
 from app.models.user import User
 from app.schemas.user import TokenData
 
-oauth2_schema = OAuth2PasswordBearer(tokenUrl='login')
+oauth2_schema = OAuth2PasswordBearer(tokenUrl="/login/")
 
 
 SECRET_KEY = settings.secret_key
