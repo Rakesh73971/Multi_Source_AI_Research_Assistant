@@ -1,22 +1,25 @@
-from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
+from pydantic import BaseModel
+from app.models.conversation_message import MessageRole, QueryType
+
 
 class ConversionMessageCreate(BaseModel):
     session_id: int
-    role: str
+    role: MessageRole
     content: str
-    sources_used: str
-    query_type: str
-    tokens_used: int
+    sources_used: Optional[list[dict[str, Any]]] = None
+    query_type: QueryType = QueryType.QUESTION
+    tokens_used: Optional[int] = None
+
 
 class ConversionMessageUpdate(BaseModel):
     session_id: Optional[int] = None
-    role: Optional[str] = None
+    role: Optional[MessageRole] = None
     content: Optional[str] = None
-    sources_used: Optional[str] = None
-    query_type: Optional[str] = None
-    tokens_used: Optional[str] = None
+    sources_used: Optional[list[dict[str, Any]]] = None
+    query_type: Optional[QueryType] = None
+    tokens_used: Optional[int] = None
 
 
 class ConversionMessageResponse(ConversionMessageCreate):

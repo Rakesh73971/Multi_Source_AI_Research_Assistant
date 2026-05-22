@@ -1,38 +1,41 @@
-from pydantic import BaseModel,EmailStr
-from typing import Optional
 from datetime import datetime
-from typing import Optional
 from enum import Enum
+from typing import Optional
+from pydantic import BaseModel, EmailStr
 
-class UserRole(str,Enum):
-    admin = 'admin'
-    user = 'user'
+
+class UserRole(str, Enum):
+    admin = "admin"
+    user = "user"
 
 
 class UserCreate(BaseModel):
     full_name: str
     email: EmailStr
     password: str
-    role: UserRole
-    is_active: Optional[bool] = True
-    
+    role: UserRole = UserRole.user
+    is_active: bool = True
+
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    role: Optional[UserRole] = None
+    is_active: Optional[bool] = None
+
 
 class UserResponse(BaseModel):
+    id: int
     full_name: str
     email: EmailStr
-    role: str
+    role: UserRole
     is_active: bool
     created: datetime
 
     class Config:
         from_attributes = True
 
-class UserUpdate(BaseModel):
-    full_name:Optional[str] = None
-    email:Optional[str] = None
-    role:Optional[str] = None
-    is_active:Optional[bool] = None
-    
 
 class TokenData(BaseModel):
-    id:Optional[int] = None
+    id: Optional[int] = None
