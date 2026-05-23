@@ -5,8 +5,15 @@ from sqlalchemy.orm import Session
 
 from app.core.oauth2 import get_current_user
 from app.db.database import get_db
-from app.schemas.research_session import SessionCreate, SessionResponse, SessionUpdate
+from app.schemas.research_session import (
+    AskRequest,
+    AskResponse,
+    SessionCreate,
+    SessionResponse,
+    SessionUpdate,
+)
 from app.services.session_service import (
+    ask_session_question_service,
     create_session_service,
     delete_session_service,
     get_session_service,
@@ -45,6 +52,22 @@ def get_session(
     current_user=Depends(get_current_user),
 ):
     return get_session_service(db, session_id, current_user)
+
+
+@router.post("/{session_id}/ask", status_code=status.HTTP_200_OK, response_model=AskResponse)
+def ask_session_question(
+    session_id: int,
+    request: AskRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    return ask_session_question_service(
+        db=db,
+        session_id=session_id,
+        question=request.question,
+        top_k=request.top_k,
+        current_user=current_user,
+    )
 
 
 @router.put("/{session_id}", status_code=status.HTTP_200_OK, response_model=SessionResponse)
