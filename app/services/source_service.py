@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.research_session import ResearchSession
-from app.models.source import Source
+from app.models.source import Source, SourceStatus, SourceType
 
 
 def _get_owned_session(db: Session, session_id: int, current_user):
@@ -39,6 +39,146 @@ def create_source_service(db: Session, source, current_user):
     db.commit()
     db.refresh(db_source)
     return db_source
+
+
+def create_pdf_source_service(
+    db: Session,
+    session_id: int,
+    file_name: str,
+    file_path: str,
+    extracted_text: str,
+    chunk_count: int,
+    current_user,
+):
+    session = _get_owned_session(db, session_id, current_user)
+
+    db_source = Source(
+        session_id=session_id,
+        user_id=current_user.id,
+        source_type=SourceType.PDF,
+        file_name=file_name,
+        file_path=file_path,
+        title=file_name,
+        extracted_text=extracted_text,
+        chunk_count=chunk_count,
+        status=SourceStatus.PROCESSING,
+    )
+
+    session.source_count = (session.source_count or 0) + 1
+    db.add(db_source)
+    db.commit()
+    db.refresh(db_source)
+    return db_source
+
+
+def create_pending_pdf_source_service(
+    db: Session,
+    session_id: int,
+    file_name: str,
+    file_path: str,
+    current_user,
+):
+    session = _get_owned_session(db, session_id, current_user)
+
+    db_source = Source(
+        session_id=session_id,
+        user_id=current_user.id,
+        source_type=SourceType.PDF,
+        file_name=file_name,
+        file_path=file_path,
+        title=file_name,
+        status=SourceStatus.PROCESSING,
+    )
+
+    session.source_count = (session.source_count or 0) + 1
+    db.add(db_source)
+    db.commit()
+    db.refresh(db_source)
+    return db_source
+
+
+def create_text_source_service(
+    db: Session,
+    session_id: int,
+    source_type: SourceType,
+    title: str,
+    extracted_text: str,
+    chunk_count: int,
+    current_user,
+    source_url: str | None = None,
+):
+    session = _get_owned_session(db, session_id, current_user)
+
+    db_source = Source(
+        session_id=session_id,
+        user_id=current_user.id,
+        source_type=source_type,
+        source_url=source_url,
+        title=title,
+        extracted_text=extracted_text,
+        chunk_count=chunk_count,
+        status=SourceStatus.PROCESSING,
+    )
+
+    session.source_count = (session.source_count or 0) + 1
+    db.add(db_source)
+    db.commit()
+    db.refresh(db_source)
+    return db_source
+
+
+def create_pending_text_source_service(
+    db: Session,
+    session_id: int,
+    source_type: SourceType,
+    title: str,
+    current_user,
+    source_url: str | None = None,
+):
+    session = _get_owned_session(db, session_id, current_user)
+
+    db_source = Source(
+        session_id=session_id,
+        user_id=current_user.id,
+        source_type=source_type,
+        source_url=source_url,
+        title=title,
+        status=SourceStatus.PROCESSING,
+    )
+
+    session.source_count = (session.source_count or 0) + 1
+    db.add(db_source)
+    db.commit()
+    db.refresh(db_source)
+    return db_source
+
+
+def set_source_task_id_service(db: Session, source: Source, task_id: str):
+    source.task_id = task_id
+    db.commit()
+    db.refresh(source)
+    return source
+
+
+def get_source_by_id(db: Session, source_id: int):
+    return db.query(Source).filter(Source.id == source_id).first()
+
+
+def mark_source_ready_service(db: Session, source: Source, chunk_count: int):
+    source.chunk_count = chunk_count
+    source.status = SourceStatus.READY
+    source.error_message = None
+    db.commit()
+    db.refresh(source)
+    return source
+
+
+def mark_source_failed_service(db: Session, source: Source, error_message: str):
+    source.status = SourceStatus.FAILED
+    source.error_message = error_message
+    db.commit()
+    db.refresh(source)
+    return source
 
 
 def get_sources_service(db: Session, current_user):

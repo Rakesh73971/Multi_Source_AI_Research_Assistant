@@ -1,6 +1,8 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.agents.research_graph import run_research_agent
+from app.models.conversation_message import ConversationMessage, MessageRole, QueryType
 from app.models.research_session import ResearchSession
 
 
@@ -56,3 +58,59 @@ def delete_session_service(db: Session, session_id: int, current_user):
     db.delete(session)
     db.commit()
     return None
+
+
+def ask_session_question_service(
+    db: Session,
+    session_id: int,
+    question: str,
+    top_k: int,
+    current_user,
+):
+    session = get_session_service(db, session_id, current_user)
+
+    user_message = ConversationMessage(
+        session_id=session.id,
+        user_id=current_user.id,
+        role=MessageRole.USER,
+        content=question,
+        query_type=QueryType.QUESTION,
+    )
+    db.add(user_message)
+    db.commit()
+
+    agent_result = run_research_agent(
+        collection_name=session.chroma_collection_db,
+        question=question,
+        top_k=top_k,
+    )
+    chunks = agent_result["chunks"]
+    answer = agent_result["answer"]
+
+    sources = [
+        {
+            "source_id": chunk["metadata"].get("source_id"),
+            "source_title": chunk["metadata"].get("source_title"),
+            "chunk_index": chunk["metadata"].get("chunk_index"),
+            "score": chunk["score"],
+        }
+        for chunk in chunks
+    ]
+
+    assistant_message = ConversationMessage(
+        session_id=session.id,
+        user_id=current_user.id,
+        role=MessageRole.ASSISTANT,
+        content=answer,
+        sources_used=sources,
+        query_type=QueryType.QUESTION,
+    )
+    db.add(assistant_message)
+    db.commit()
+
+    return {
+        "session_id": session.id,
+        "question": question,
+        "answer": answer,
+        "sources": sources,
+    }
