@@ -27,12 +27,14 @@ langchain-google-genai
 langchain-community
 langchain-core
 langchain-text-splitters
+langgraph
 
 # Vector Store
 chromadb
 
 # PDF Parsing
 pdfplumber
+youtube-transcript-api
 
 # Async Task Queue
 celery==5.4.0
