@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 from pydantic import BaseModel
 from app.models.source import SourceStatus, SourceType
 
@@ -16,6 +16,24 @@ class SourceCreate(BaseModel):
     status: SourceStatus = SourceStatus.PENDING
     task_id: Optional[str] = None
     error_message: Optional[str] = None
+
+
+class UrlSourceCreate(BaseModel):
+    session_id: int
+    source_url: str
+    title: Optional[str] = None
+
+
+class YoutubeSourceCreate(BaseModel):
+    session_id: int
+    source_url: str
+    title: Optional[str] = None
+
+
+class TaskStatusResponse(BaseModel):
+    task_id: str
+    status: str
+    result: Optional[Any] = None
 
 
 class SourceUpdate(BaseModel):

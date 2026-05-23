@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 from pydantic import BaseModel
 from app.models.research_session import SessionStatus
 
@@ -30,3 +30,15 @@ class SessionResponse(SessionCreate):
 
     class Config:
         from_attributes = True
+
+
+class AskRequest(BaseModel):
+    question: str
+    top_k: int = 4
+
+
+class AskResponse(BaseModel):
+    session_id: int
+    question: str
+    answer: str
+    sources: list[dict[str, Any]]
