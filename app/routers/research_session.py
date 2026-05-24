@@ -66,6 +66,7 @@ def ask_session_question(
         session_id=session_id,
         question=request.question,
         top_k=request.top_k,
+        source_id=request.source_id,
         current_user=current_user,
     )
 
