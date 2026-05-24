@@ -35,6 +35,7 @@ class SessionResponse(SessionCreate):
 class AskRequest(BaseModel):
     question: str
     top_k: int = 4
+    source_id: Optional[int] = None
 
 
 class AskResponse(BaseModel):
