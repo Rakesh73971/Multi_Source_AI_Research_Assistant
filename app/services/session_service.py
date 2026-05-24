@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.agents.research_graph import run_research_agent
 from app.models.conversation_message import ConversationMessage, MessageRole, QueryType
 from app.models.research_session import ResearchSession
+from app.models.source import Source, SourceStatus
 
 
 def create_session_service(db: Session, session, current_user):
@@ -66,8 +67,26 @@ def ask_session_question_service(
     question: str,
     top_k: int,
     current_user,
+    source_id: int | None = None,
 ):
     session = get_session_service(db, session_id, current_user)
+
+    if source_id is not None:
+        source = db.query(Source).filter(
+            Source.id == source_id,
+            Source.session_id == session.id,
+            Source.user_id == current_user.id,
+        ).first()
+        if source is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Source with id {source_id} not found in this session",
+            )
+        if source.status != SourceStatus.READY:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Source with id {source_id} is not ready yet",
+            )
 
     user_message = ConversationMessage(
         session_id=session.id,
@@ -83,6 +102,7 @@ def ask_session_question_service(
         collection_name=session.chroma_collection_db,
         question=question,
         top_k=top_k,
+        source_id=source_id,
     )
     chunks = agent_result["chunks"]
     answer = agent_result["answer"]
