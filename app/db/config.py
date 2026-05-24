@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     algorithm: str
     access_token_expire_minutes: int
     google_api_key: str
+    gemini_embedding_model: str = "models/gemini-embedding-001"
+    gemini_chat_model: str = "gemini-2.5-flash"
     redis_url: str = "redis://localhost:6379/0"
 
     model_config = SettingsConfigDict(
