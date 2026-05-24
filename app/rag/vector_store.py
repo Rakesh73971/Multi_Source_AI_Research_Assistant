@@ -9,12 +9,11 @@ from app.ingestion.text_splitter import TextChunk
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CHROMA_DIR = PROJECT_ROOT / "chroma_db"
-EMBEDDING_MODEL = "models/text-embedding-004"
 
 
 def _get_embeddings():
     return GoogleGenerativeAIEmbeddings(
-        model=EMBEDDING_MODEL,
+        model=settings.gemini_embedding_model,
         google_api_key=settings.google_api_key,
     )
 
@@ -60,9 +59,15 @@ def retrieve_relevant_chunks(
     collection_name: str,
     question: str,
     top_k: int = 4,
+    source_id: int | None = None,
 ) -> list[dict[str, Any]]:
     vector_store = get_vector_store(collection_name)
-    results = vector_store.similarity_search_with_score(question, k=top_k)
+    filter_query = {"source_id": source_id} if source_id is not None else None
+    results = vector_store.similarity_search_with_score(
+        question,
+        k=top_k,
+        filter=filter_query,
+    )
 
     return [
         {

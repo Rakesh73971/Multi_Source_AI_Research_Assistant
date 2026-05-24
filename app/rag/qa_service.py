@@ -3,9 +3,6 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from app.db.config import settings
 
 
-CHAT_MODEL = "gemini-1.5-flash"
-
-
 def build_context(chunks: list[dict]) -> str:
     context_blocks = []
     for index, chunk in enumerate(chunks, start=1):
@@ -33,7 +30,7 @@ def generate_answer(question: str, chunks: list[dict]) -> str:
         return "I could not find relevant context in the uploaded sources."
 
     llm = ChatGoogleGenerativeAI(
-        model=CHAT_MODEL,
+        model=settings.gemini_chat_model,
         google_api_key=settings.google_api_key,
         temperature=0.2,
     )
