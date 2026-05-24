@@ -10,6 +10,7 @@ class ResearchAgentState(TypedDict):
     collection_name: str
     question: str
     top_k: int
+    source_id: int | None
     route: Literal["retrieve", "answer_without_context"]
     chunks: list[dict[str, Any]]
     answer: str
@@ -28,6 +29,7 @@ def retrieve_context(state: ResearchAgentState) -> ResearchAgentState:
         collection_name=state["collection_name"],
         question=state["question"],
         top_k=state["top_k"],
+        source_id=state["source_id"],
     )
     return {**state, "chunks": chunks}
 
@@ -85,12 +87,18 @@ def build_research_graph():
 research_graph = build_research_graph()
 
 
-def run_research_agent(collection_name: str, question: str, top_k: int = 4) -> dict[str, Any]:
+def run_research_agent(
+    collection_name: str,
+    question: str,
+    top_k: int = 4,
+    source_id: int | None = None,
+) -> dict[str, Any]:
     return research_graph.invoke(
         {
             "collection_name": collection_name,
             "question": question,
             "top_k": top_k,
+            "source_id": source_id,
             "route": "retrieve",
             "chunks": [],
             "answer": "",
