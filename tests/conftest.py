@@ -60,6 +60,22 @@ def token(test_user):
 def authorized_access(client,token):
     client.headers = {
         **client.headers,
-        'Authorization':f'Bearer:{token}'
+        'Authorization':f'Bearer {token}'
     }
     return client
+
+
+@pytest.fixture
+def test_research_session(authorized_access,test_user):
+    payload = {
+        "user_id":test_user['id'],
+        "name":"RAG Test Session",
+        "chroma_collection_db":"rag_test_session_001",
+        "status":"active"
+    }
+    response = authorized_access.post("/research_sessions/",json=payload)
+    assert response.status_code == 201
+    
+    research_session = response.json()
+
+    return research_session
