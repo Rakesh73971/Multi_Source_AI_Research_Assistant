@@ -1,112 +1,168 @@
-# Multi-Source AI Research Assistant
+# 🧠 Multi-Source AI Research Assistant
 
-The **Multi-Source AI Research Assistant** is a powerful backend service built with FastAPI that allows users to seamlessly digest, index, and converse with a variety of data sources. Designed for deep research, the assistant can ingest PDFs, scrape URLs, and transcribe YouTube videos, indexing the content via vector embeddings into ChromaDB. Users can then engage in intelligent, context-aware conversations using Retrieval-Augmented Generation (RAG) powered by Google's Gemini models.
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.124.4-009688.svg?style=flat&logo=FastAPI&logoColor=white)](https://fastapi.tiangolo.com)
+[![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
+[![Celery](https://img.shields.io/badge/celery-%2337814A.svg?style=flat&logo=celery&logoColor=white)](https://docs.celeryq.dev/en/stable/)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 
-## 🚀 Features
+A powerful, high-performance backend service that enables users to intelligently ingest, index, and converse with a wide variety of data sources. By combining **Retrieval-Augmented Generation (RAG)** with the **Google Gemini LLM**, this assistant can accurately answer questions based on custom PDFs, web articles, and YouTube video transcripts.
 
-- **Multi-Source Ingestion**: Automatically process and extract text from PDFs, URLs, and YouTube videos.
-- **Asynchronous Processing**: Long-running ingestion tasks are handled seamlessly in the background using Celery and Redis, ensuring the API remains fast and responsive.
-- **Intelligent RAG Pipeline**: Utilizes LangChain and Google Gemini to generate embeddings and retrieve highly relevant context for answering user queries.
-- **Conversation History**: Full stateful chat support. Conversations and sources are persisted securely in a PostgreSQL database.
-- **Session Management**: Organize research into distinct "Research Sessions", keeping different topics and their sources isolated using distinct ChromaDB collections.
-- **Secure Authentication**: JWT-based OAuth2 authentication and role-based access control (Admin/User).
-- **Fully Containerized**: Ready to deploy with a complete Docker Compose environment.
+---
 
-## 🛠️ Tech Stack
+## ✨ Key Features
 
-- **Framework**: FastAPI
-- **Database**: PostgreSQL (Relational) & ChromaDB (Vector Store)
-- **Task Queue**: Celery & Redis
-- **AI / LLM**: Google Gemini (via LangChain)
-- **Containerization**: Docker & Docker Compose
-- **Testing**: Pytest
+- **Multi-Modal Data Ingestion**: Seamlessly upload and process PDF documents, scrape unstructured web URLs, and extract transcripts directly from YouTube videos.
+- **Asynchronous Task Processing**: Built with **Celery** and **Redis** to offload heavy operations (like PDF parsing and web scraping) to background worker queues, ensuring the API remains highly responsive.
+- **Advanced RAG Pipeline**: Utilizes **LangChain** and a local **ChromaDB** vector database to chunk text, generate semantic embeddings, and retrieve the most relevant context for user queries.
+- **Stateful Conversations**: Persists complete chat histories and session states in a **PostgreSQL** relational database using **SQLAlchemy** ORM.
+- **Research Sessions**: Organizes sources and chats into distinct "Sessions," preventing context contamination between different research topics.
+- **Secure Authentication**: Implements robust OAuth2 with JWT (JSON Web Tokens) for user authentication and role-based access control (RBAC).
+- **Production-Ready Containerization**: Fully dockerized with a `docker-compose` environment orchestrating the Web server, Worker, Database, and Cache.
 
-## 📋 Prerequisites
+---
 
-Before you begin, ensure you have the following installed:
-- [Python 3.12+](https://www.python.org/downloads/) (if running locally without Docker)
-- [Docker](https://www.docker.com/) and Docker Compose
-- A [Google Gemini API Key](https://aistudio.google.com/app/apikey)
+## 🛠️ Technology Stack
 
-## ⚙️ Environment Variables
+### Backend & API
+- **FastAPI**: Modern, fast web framework for building APIs.
+- **Uvicorn**: ASGI web server implementation.
+- **Pydantic (v2)**: Data validation and settings management.
 
-Create a `.env` file in the root directory and configure the following variables:
+### AI & Machine Learning
+- **LangChain**: Framework for developing applications powered by language models.
+- **Google GenAI (Gemini)**: State-of-the-art LLM used for embeddings and text generation.
+- **ChromaDB**: Open-source embedding database for AI applications.
 
-```env
-# Database Configuration
-DATABASE_HOSTNAME=db # Use 'localhost' if running without Docker
-DATABASE_PORT=5432
-DATABASE_USERNAME=postgres
-DATABASE_PASSWORD=password123
-DATABASE_NAME=ai_research_assistant
+### Data Persistence & Message Broker
+- **PostgreSQL**: Robust, open-source relational database.
+- **SQLAlchemy**: Python SQL toolkit and Object Relational Mapper.
+- **Redis**: In-memory data structure store, used as a message broker for Celery.
+- **Celery**: Distributed task queue for asynchronous background jobs.
 
-# Authentication (JWT)
-SECRET_KEY=your_super_secret_key_here
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+### DevOps & Testing
+- **Docker & Docker Compose**: Containerization and orchestration.
+- **Pytest**: Framework for building simple and scalable automated tests.
 
-# Celery / Redis
-REDIS_URL=redis://redis:6379/0 # Use 'redis://localhost:6379/0' if running locally
+---
 
-# AI Configuration
-GOOGLE_API_KEY=your_google_gemini_api_key
+## 📂 Project Structure
+
+```text
+.
+├── app/
+│   ├── core/           # Security, OAuth2, config, and utility functions
+│   ├── db/             # Database connection, settings, and Alembic setups
+│   ├── ingestion/      # Logic for PDF parsing, URL scraping, and YouTube extraction
+│   ├── models/         # SQLAlchemy ORM database models
+│   ├── routers/        # FastAPI API endpoints (controllers)
+│   ├── schemas/        # Pydantic schemas for request/response validation
+│   ├── services/       # Core business logic bridging routers and models
+│   └── tasks/          # Celery app initialization and async background tasks
+├── tests/              # Pytest suite with mock fixtures
+├── Dockerfile          # Docker image definition for web and worker
+├── docker-compose.yml  # Multi-container orchestration
+├── requirements.txt    # Python dependencies
+└── README.md           # Project documentation
 ```
 
-## 🐳 Running with Docker (Recommended)
+---
 
-The easiest way to get the entire stack (FastAPI, Postgres, Redis, and Celery Worker) up and running is via Docker Compose:
+## ⚙️ Environment Configuration
 
-1. Ensure your `.env` file is configured correctly.
-2. Build and start the containers:
+Create a `.env` file in the root of the project. The application expects the following variables:
+
+| Variable | Description | Example |
+|---|---|---|
+| `DATABASE_HOSTNAME` | Database host (use `db` for Docker, `localhost` for local) | `db` |
+| `DATABASE_PORT` | Database port | `5432` |
+| `DATABASE_USERNAME` | Postgres user | `postgres` |
+| `DATABASE_PASSWORD` | Postgres password | `password123` |
+| `DATABASE_NAME` | Postgres database name | `ai_research_assistant` |
+| `SECRET_KEY` | Cryptographic key for JWT encoding | `your_secret_key_here` |
+| `ALGORITHM` | JWT signing algorithm | `HS256` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES`| JWT expiration time in minutes | `30` |
+| `REDIS_URL` | Redis broker URL for Celery | `redis://redis:6379/0` |
+| `GOOGLE_API_KEY` | Google Gemini API key | `AIzaSy...` |
+
+---
+
+## 🚀 Getting Started
+
+### Method 1: Using Docker (Highly Recommended)
+
+The easiest way to run the entire stack is using Docker Compose. This will spin up the PostgreSQL database, Redis broker, FastAPI web server, and the Celery worker automatically.
+
+1. Ensure Docker Desktop is installed and running.
+2. Verify your `.env` file is populated.
+3. Build and launch the stack:
    ```bash
    docker-compose up --build
    ```
-3. The API will be available at `http://localhost:8000`. You can view the interactive Swagger documentation at `http://localhost:8000/docs`.
+4. Access the API at `http://localhost:8000`.
+5. Access the interactive API documentation at `http://localhost:8000/docs`.
 
-## 💻 Running Locally (Without Docker)
+### Method 2: Running Locally (Without Docker)
 
 If you prefer to run the services directly on your host machine:
 
-1. **Start PostgreSQL and Redis** on your local machine and ensure they match your `.env` credentials.
+1. **Start External Services**: Ensure PostgreSQL and Redis are running locally on their default ports.
 2. **Create a Virtual Environment**:
    ```bash
    python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 3. **Install Dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
-4. **Run Database Migrations** (if using Alembic):
-   ```bash
-   alembic upgrade head
-   ```
-5. **Start the FastAPI Server**:
+4. **Start the FastAPI Server**:
    ```bash
    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
    ```
-6. **Start the Celery Worker** (in a separate terminal):
+5. **Start the Celery Worker** (in a separate terminal window):
    ```bash
    celery -A app.tasks.celery_app worker --loglevel=info
    ```
 
-## 🧪 Running Tests
+---
 
-The project includes a comprehensive Pytest suite that tests the authentication, conversation, and ingestion endpoints (with Celery mocked).
+## 🌐 API Endpoints Overview
 
-To run the tests:
+Below is a high-level summary of the core API routes. For detailed request payloads and response schemas, navigate to the Swagger UI (`/docs`).
+
+### Authentication & Users
+- `POST /login/` - Authenticate a user and receive an OAuth2 JWT access token.
+- `POST /users/` - Register a new user account.
+- `GET /users/` - Retrieve user profiles.
+
+### Research Sessions
+- `POST /research_sessions/` - Initialize a new isolated research context.
+- `GET /research_sessions/` - List all active research sessions for the authenticated user.
+
+### Data Ingestion (Sources)
+- `POST /sources/pdf` - Upload a local PDF file for text extraction and vector embedding.
+- `POST /sources/url` - Provide a web URL to be scraped and indexed.
+- `POST /sources/youtube` - Provide a YouTube URL to extract and index its transcript.
+- `GET /sources/tasks/{task_id}` - Poll the status of a background Celery ingestion task.
+
+### Conversations (RAG Interaction)
+- `POST /conversation_messages/` - Submit a question to the LLM within a specific session. The LLM will use the session's embedded sources to generate an answer.
+- `GET /conversation_messages/` - Retrieve the history of a conversation.
+
+---
+
+## 🧪 Testing
+
+The project is fully covered by an automated test suite using `pytest`. The tests utilize a specialized test database, override dependency injections, and mock Celery tasks to ensure isolation and speed.
+
+To execute the test suite:
 ```bash
 pytest
 ```
+*(Ensure you have a local test database running, or run the tests from within a test container context).*
 
-## 📚 Core API Endpoints
+---
 
-- **`POST /login/`**: Authenticate and receive a JWT token.
-- **`POST /users/`**: Register a new user.
-- **`POST /research_sessions/`**: Create a new research session.
-- **`POST /sources/pdf`**: Upload a PDF document for analysis.
-- **`POST /sources/url`**: Submit a URL to be scraped and indexed.
-- **`POST /sources/youtube`**: Submit a YouTube URL for transcript extraction.
-- **`POST /conversation_messages/`**: Send a message/query to the assistant and receive an AI-generated response based on your indexed sources.
+## 📝 License
 
-*For full endpoint details and payload schemas, visit the `/docs` endpoint once the server is running.*
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
