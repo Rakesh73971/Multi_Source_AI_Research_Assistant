@@ -37,6 +37,17 @@ def test_create_url_source(authorized_access, test_research_session, mock_celery
     assert response.json()["source_url"] == "https://example.com/another"
     assert response.json()["task_id"] == "mock_task_id_123"
 
+def test_create_youtube_source(authorized_access, test_research_session, mock_celery_task):
+    payload = {
+        "session_id": test_research_session["id"],
+        "source_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "title": "Rick Astley"
+    }
+    response = authorized_access.post("/sources/youtube", json=payload)
+    assert response.status_code == 201, response.json()
+    assert response.json()["source_url"] == "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+    assert response.json()["task_id"] == "mock_task_id_123"
+
 def test_get_sources(authorized_access, test_source):
     response = authorized_access.get("/sources/")
     assert response.status_code == 200
