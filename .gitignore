@@ -3,4 +3,4 @@ __pycache__
 venv
 .env
 uploads
-chroma_db/fc1c5dd8-117a-4468-9772-a286543fe47c
+chroma_db
