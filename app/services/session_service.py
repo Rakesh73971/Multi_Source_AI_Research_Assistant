@@ -88,6 +88,26 @@ def ask_session_question_service(
                 detail=f"Source with id {source_id} is not ready yet",
             )
 
+    # Fetch recent conversation history (last 6 messages)
+    history_messages = (
+        db.query(ConversationMessage)
+        .filter(ConversationMessage.session_id == session.id)
+        .order_by(
+            ConversationMessage.created_at.desc(), ConversationMessage.id.desc()
+        )
+        .limit(6)
+        .all()
+    )
+    # Reverse to keep chronological order
+    history_messages.reverse()
+    chat_history = [
+        {
+            "role": msg.role.value if hasattr(msg.role, "value") else msg.role,
+            "content": msg.content,
+        }
+        for msg in history_messages
+    ]
+
     user_message = ConversationMessage(
         session_id=session.id,
         user_id=current_user.id,
@@ -103,6 +123,7 @@ def ask_session_question_service(
         question=question,
         top_k=top_k,
         source_id=source_id,
+        chat_history=chat_history,
     )
     chunks = agent_result["chunks"]
     answer = agent_result["answer"]
