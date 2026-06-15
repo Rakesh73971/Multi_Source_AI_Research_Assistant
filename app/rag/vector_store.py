@@ -77,3 +77,16 @@ def retrieve_relevant_chunks(
         }
         for document, score in results
     ]
+
+
+def get_all_documents_in_store(collection_name: str) -> list[Document]:
+    vector_store = get_vector_store(collection_name)
+    collection_data = vector_store._collection.get()
+    documents_list = collection_data.get("documents", [])
+    metadatas_list = collection_data.get("metadatas", []) or []
+
+    docs = []
+    for i, content in enumerate(documents_list):
+        metadata = metadatas_list[i] if i < len(metadatas_list) else {}
+        docs.append(Document(page_content=content, metadata=metadata))
+    return docs
