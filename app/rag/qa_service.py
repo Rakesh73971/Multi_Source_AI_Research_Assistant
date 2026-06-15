@@ -25,7 +25,9 @@ def build_context(chunks: list[dict]) -> str:
     return "\n\n---\n\n".join(context_blocks)
 
 
-def generate_answer(question: str, chunks: list[dict]) -> str:
+def generate_answer(
+    question: str, chunks: list[dict], chat_history: list[dict] = None
+) -> str:
     if not chunks:
         return "I could not find relevant context in the uploaded sources."
 
@@ -35,10 +37,21 @@ def generate_answer(question: str, chunks: list[dict]) -> str:
         temperature=0.2,
     )
 
+    history_blocks = []
+    if chat_history:
+        for msg in chat_history:
+            role = "User" if msg.get("role") == "user" else "Assistant"
+            content = msg.get("content", "")
+            history_blocks.append(f"{role}: {content}")
+    history_str = "\n".join(history_blocks)
+
     prompt = f"""
 You are a research assistant. Answer the user's question using only the provided context.
 If the context is not enough, say that the uploaded sources do not contain enough information.
 Include concise source citations using source_id and chunk_index.
+
+Chat History:
+{history_str}
 
 Question:
 {question}
