@@ -14,6 +14,7 @@ class ResearchAgentState(TypedDict):
     route: Literal["retrieve", "answer_without_context"]
     chunks: list[dict[str, Any]]
     answer: str
+    chat_history: list[dict[str, Any]]
 
 
 def route_question(state: ResearchAgentState) -> ResearchAgentState:
@@ -43,7 +44,9 @@ def check_confidence(state: ResearchAgentState) -> str:
 
 
 def generate_response(state: ResearchAgentState) -> ResearchAgentState:
-    answer = generate_answer(state["question"], state["chunks"])
+    answer = generate_answer(
+        state["question"], state["chunks"], state.get("chat_history")
+    )
     return {**state, "answer": answer}
 
 
@@ -92,6 +95,7 @@ def run_research_agent(
     question: str,
     top_k: int = 4,
     source_id: int | None = None,
+    chat_history: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     return research_graph.invoke(
         {
@@ -102,5 +106,6 @@ def run_research_agent(
             "route": "retrieve",
             "chunks": [],
             "answer": "",
+            "chat_history": chat_history or [],
         }
     )
