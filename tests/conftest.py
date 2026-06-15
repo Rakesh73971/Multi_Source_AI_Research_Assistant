@@ -79,3 +79,13 @@ def test_research_session(authorized_access,test_user):
     research_session = response.json()
 
     return research_session
+
+
+@pytest.fixture(autouse=True)
+def mock_celery_delay(monkeypatch):
+    from unittest.mock import MagicMock
+    from app.tasks.ingestion_tasks import update_session_summary_task
+
+    mock_delay = MagicMock()
+    monkeypatch.setattr(update_session_summary_task, "delay", mock_delay)
+    return mock_delay
