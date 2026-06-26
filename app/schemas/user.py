@@ -4,16 +4,14 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr, ConfigDict
 
 
-class UserRole(str, Enum):
-    admin = "admin"
-    user = "user"
+from app.models.user import UserRole
 
 
 class UserCreate(BaseModel):
     full_name: str
     email: EmailStr
     password: str
-    role: UserRole = UserRole.user
+    role: UserRole = UserRole.USER
     is_active: bool = True
 
 

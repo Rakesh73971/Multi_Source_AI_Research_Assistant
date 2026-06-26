@@ -4,22 +4,23 @@ from pydantic import BaseModel, ConfigDict
 from app.models.research_session import SessionStatus
 
 
-class SessionCreate(BaseModel):
-    name: str
+class SessionBase(BaseModel):
     description: Optional[str] = None
-    chroma_collection_db: str
-    status: SessionStatus = SessionStatus.ACTIVE
-    summary: Optional[str] = None
-    source_count: int = 0
-
-
-class SessionUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    chroma_collection_db: Optional[str] = None
     status: Optional[SessionStatus] = None
     summary: Optional[str] = None
     source_count: Optional[int] = None
+
+
+class SessionCreate(SessionBase):
+    name: str
+    chroma_collection_db: str
+    status: SessionStatus = SessionStatus.ACTIVE
+    source_count: int = 0
+
+
+class SessionUpdate(SessionBase):
+    name: Optional[str] = None
+    chroma_collection_db: Optional[str] = None
 
 
 class SessionResponse(SessionCreate):
