@@ -72,17 +72,8 @@ def ask_session_question(
 
 
 @router.put("/{session_id}", status_code=status.HTTP_200_OK, response_model=SessionResponse)
-def update_complete_session(
-    session_id: int,
-    session: SessionUpdate,
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
-):
-    return update_session_service(db, session_id, session, current_user)
-
-
 @router.patch("/{session_id}", status_code=status.HTTP_200_OK, response_model=SessionResponse)
-def update_partial_session(
+def update_session(
     session_id: int,
     session: SessionUpdate,
     db: Session = Depends(get_db),

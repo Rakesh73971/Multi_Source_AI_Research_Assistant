@@ -54,18 +54,8 @@ def get_user(
 
 
 @router.put("/{user_id}", status_code=status.HTTP_200_OK, response_model=UserResponse)
-def update_complete_user(
-    user_id: int,
-    user: UserUpdate,
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
-):
-    _ensure_self_or_admin(user_id, current_user)
-    return update_user_service(db, user_id, user)
-
-
 @router.patch("/{user_id}", status_code=status.HTTP_200_OK, response_model=UserResponse)
-def update_partial_user(
+def update_user(
     user_id: int,
     user: UserUpdate,
     db: Session = Depends(get_db),

@@ -52,17 +52,8 @@ def get_conversion_message(
 
 
 @router.put("/{msg_id}", status_code=status.HTTP_200_OK, response_model=ConversionMessageResponse)
-def update_complete_conversion_message(
-    msg_id: int,
-    conversion_msg: ConversionMessageUpdate,
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
-):
-    return update_conversion_msg_service(db, msg_id, conversion_msg, current_user)
-
-
 @router.patch("/{msg_id}", status_code=status.HTTP_200_OK, response_model=ConversionMessageResponse)
-def update_partial_conversion_message(
+def update_conversion_message(
     msg_id: int,
     conversion_msg: ConversionMessageUpdate,
     db: Session = Depends(get_db),

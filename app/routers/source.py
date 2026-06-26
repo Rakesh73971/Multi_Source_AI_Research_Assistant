@@ -138,17 +138,8 @@ def get_source(
 
 
 @router.put("/{source_id}", status_code=status.HTTP_200_OK, response_model=SourceResponse)
-def update_complete_source(
-    source_id: int,
-    source: SourceUpdate,
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
-):
-    return update_source_service(db, source_id, source, current_user)
-
-
 @router.patch("/{source_id}", status_code=status.HTTP_200_OK, response_model=SourceResponse)
-def update_partial_source(
+def update_source(
     source_id: int,
     source: SourceUpdate,
     db: Session = Depends(get_db),
