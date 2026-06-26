@@ -5,7 +5,7 @@ from enum import Enum as PyEnum
 from sqlalchemy.orm import relationship
 
 
-class UserRole(PyEnum):
+class UserRole(str, PyEnum):
     ADMIN = "admin"
     USER = "user"
 
@@ -17,7 +17,7 @@ class User(Base):
     email = Column(String,unique=True,nullable=False)
     password = Column(String,nullable=False)
     role = Column(SAEnum(UserRole, values_callable=lambda x: [e.value for e in x]),default=UserRole.USER, nullable=False)
-    is_active = Column(Boolean,server_default='True',nullable=False)
+    is_active = Column(Boolean,default=True,server_default=text('true'),nullable=False)
     created = Column(TIMESTAMP(timezone=True),server_default=text('now()'),nullable=False)
     sessions = relationship('ResearchSession',back_populates='user')
     messages = relationship('ConversationMessage',back_populates='user')
