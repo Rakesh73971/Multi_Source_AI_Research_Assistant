@@ -2,24 +2,11 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.conversation_message import ConversationMessage
-from app.models.research_session import ResearchSession
-
-
-def _get_owned_session(db: Session, session_id: int, current_user):
-    session = db.query(ResearchSession).filter(
-        ResearchSession.id == session_id,
-        ResearchSession.user_id == current_user.id,
-    ).first()
-    if session is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Research session with id {session_id} not found",
-        )
-    return session
+from app.services.session_service import get_session_service
 
 
 def create_conversion_msg_service(db: Session, message, current_user):
-    _get_owned_session(db, message.session_id, current_user)
+    get_session_service(db, message.session_id, current_user)
 
     conversion_msg = ConversationMessage(
         session_id=message.session_id,
@@ -60,7 +47,7 @@ def update_conversion_msg_service(db: Session, msg_id: int, message_update, curr
     update_data = message_update.model_dump(exclude_unset=True)
 
     if "session_id" in update_data:
-        _get_owned_session(db, update_data["session_id"], current_user)
+        get_session_service(db, update_data["session_id"], current_user)
 
     for key, value in update_data.items():
         setattr(message, key, value)

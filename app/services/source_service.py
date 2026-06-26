@@ -1,29 +1,57 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models.research_session import ResearchSession
 from app.models.source import Source, SourceStatus, SourceType
+from app.services.session_service import get_session_service
 
 
-def _get_owned_session(db: Session, session_id: int, current_user):
-    session = db.query(ResearchSession).filter(
-        ResearchSession.id == session_id,
-        ResearchSession.user_id == current_user.id,
-    ).first()
-    if session is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Research session with id {session_id} not found",
-        )
-    return session
+def _create_source_db_record(
+    db: Session,
+    session_id: int,
+    current_user,
+    source_type: SourceType,
+    status: SourceStatus = SourceStatus.PROCESSING,
+    file_name: str | None = None,
+    file_path: str | None = None,
+    title: str | None = None,
+    source_url: str | None = None,
+    extracted_text: str | None = None,
+    chunk_count: int = 0,
+    task_id: str | None = None,
+    error_message: str | None = None,
+    increment_counter: bool = True,
+):
+    session = get_session_service(db, session_id, current_user)
+
+    db_source = Source(
+        session_id=session_id,
+        user_id=current_user.id,
+        source_type=source_type,
+        source_url=source_url,
+        file_name=file_name,
+        file_path=file_path,
+        title=title or file_name,
+        extracted_text=extracted_text,
+        chunk_count=chunk_count,
+        status=status,
+        task_id=task_id,
+        error_message=error_message,
+    )
+
+    if increment_counter:
+        session.source_count = (session.source_count or 0) + 1
+
+    db.add(db_source)
+    db.commit()
+    db.refresh(db_source)
+    return db_source
 
 
 def create_source_service(db: Session, source, current_user):
-    _get_owned_session(db, source.session_id, current_user)
-
-    db_source = Source(
+    return _create_source_db_record(
+        db=db,
         session_id=source.session_id,
-        user_id=current_user.id,
+        current_user=current_user,
         source_type=source.source_type,
         source_url=source.source_url,
         file_name=source.file_name,
@@ -34,11 +62,8 @@ def create_source_service(db: Session, source, current_user):
         status=source.status,
         task_id=source.task_id,
         error_message=source.error_message,
+        increment_counter=False,
     )
-    db.add(db_source)
-    db.commit()
-    db.refresh(db_source)
-    return db_source
 
 
 def create_pdf_source_service(
@@ -50,25 +75,16 @@ def create_pdf_source_service(
     chunk_count: int,
     current_user,
 ):
-    session = _get_owned_session(db, session_id, current_user)
-
-    db_source = Source(
+    return _create_source_db_record(
+        db=db,
         session_id=session_id,
-        user_id=current_user.id,
+        current_user=current_user,
         source_type=SourceType.PDF,
         file_name=file_name,
         file_path=file_path,
-        title=file_name,
         extracted_text=extracted_text,
         chunk_count=chunk_count,
-        status=SourceStatus.PROCESSING,
     )
-
-    session.source_count = (session.source_count or 0) + 1
-    db.add(db_source)
-    db.commit()
-    db.refresh(db_source)
-    return db_source
 
 
 def create_pending_pdf_source_service(
@@ -78,23 +94,14 @@ def create_pending_pdf_source_service(
     file_path: str,
     current_user,
 ):
-    session = _get_owned_session(db, session_id, current_user)
-
-    db_source = Source(
+    return _create_source_db_record(
+        db=db,
         session_id=session_id,
-        user_id=current_user.id,
+        current_user=current_user,
         source_type=SourceType.PDF,
         file_name=file_name,
         file_path=file_path,
-        title=file_name,
-        status=SourceStatus.PROCESSING,
     )
-
-    session.source_count = (session.source_count or 0) + 1
-    db.add(db_source)
-    db.commit()
-    db.refresh(db_source)
-    return db_source
 
 
 def create_text_source_service(
@@ -107,24 +114,16 @@ def create_text_source_service(
     current_user,
     source_url: str | None = None,
 ):
-    session = _get_owned_session(db, session_id, current_user)
-
-    db_source = Source(
+    return _create_source_db_record(
+        db=db,
         session_id=session_id,
-        user_id=current_user.id,
+        current_user=current_user,
         source_type=source_type,
-        source_url=source_url,
         title=title,
         extracted_text=extracted_text,
         chunk_count=chunk_count,
-        status=SourceStatus.PROCESSING,
+        source_url=source_url,
     )
-
-    session.source_count = (session.source_count or 0) + 1
-    db.add(db_source)
-    db.commit()
-    db.refresh(db_source)
-    return db_source
 
 
 def create_pending_text_source_service(
@@ -135,22 +134,14 @@ def create_pending_text_source_service(
     current_user,
     source_url: str | None = None,
 ):
-    session = _get_owned_session(db, session_id, current_user)
-
-    db_source = Source(
+    return _create_source_db_record(
+        db=db,
         session_id=session_id,
-        user_id=current_user.id,
+        current_user=current_user,
         source_type=source_type,
-        source_url=source_url,
         title=title,
-        status=SourceStatus.PROCESSING,
+        source_url=source_url,
     )
-
-    session.source_count = (session.source_count or 0) + 1
-    db.add(db_source)
-    db.commit()
-    db.refresh(db_source)
-    return db_source
 
 
 def set_source_task_id_service(db: Session, source: Source, task_id: str):
